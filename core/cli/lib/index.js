@@ -14,24 +14,25 @@ const constant = require('./const')
 const pkg = require('../package.json')
 const init = require('@liti/init')
 const log = require('@liti/log')
-// 参数检查
-let args, config;
 
 const program = new commander.Command()
 async function core() {
     try {
-        checkVersion()
-        checkNodeVersion()
-        checkRoot()
-        checkUserHome()
-        //checkInputArgs()
-        checkEnv()
-        checkGlobalUpdate()
+        prepare()
         registerCommand()
     } catch(e) {
         log.error(e.message)
     }
 }
+async function prepare() {
+    checkVersion()
+    checkNodeVersion()
+    checkRoot()
+    checkUserHome()
+    checkEnv()
+    checkGlobalUpdate()
+}
+
 // 检查package.json中的版本号
 function checkVersion() {
     log.notice('liti', pkg.version)
@@ -45,11 +46,13 @@ function checkNodeVersion() {
         throw new Error(colors.red(`liti-cli需要安装v${lowestVersion}以上版本的Node.js`))
     }
 }
+
 function checkRoot() {
     let rootCheck  = require('root-check')
     // 检查root ,如果不是会自动降级，核心是process.geteuid,用于linux和mac
     rootCheck()
 }
+
 // 用户主目录
 function checkUserHome() {
     if(!userHome || !pathExists(userHome)) {
@@ -59,21 +62,6 @@ function checkUserHome() {
     }
 }
 
-// 检查入参
-function  checkInputArgs() {
-    let minimist  = require('minimist')
-    args = minimist(process.argv.slice(2))
-    checkArgs()
-}
-
-function checkArgs() {
-    if(args.debug) {
-        process.env.LOG_LEVEL = 'verbose'
-    } else {
-        process.env.LOG_LEVEL = 'info'
-    }
-    log.level = process.env.LOG_LEVEL
-}
 // 检查环境变量
 function checkEnv() {
     let dotenv  = require('dotenv')
@@ -91,12 +79,12 @@ function createDefaultConfig() {
     const cliConfig = {
         home: userHome
     }
-    if(process.env.CLI_HOME) {
-        cliConfig['cliHome'] = path.join(userHome, process.env.CLI_HOME)
+    if(process.env[constant.CLI_HOME]) {
+        cliConfig['cliHome'] = path.join(userHome, process.env[constant.CLI_HOME])
     } else {
         cliConfig['cliHome'] = path.join(userHome, constant.DEFAULT_CLI_HOME)
     }
-    process.env.CLI_HOME_PATH = cliConfig.cliHome;
+    process.env[constant.CLI_HOME_PATH] = cliConfig.cliHome;
 }
 async function checkGlobalUpdate() {
     // 1. 获取当前版本号和模块名
@@ -113,23 +101,33 @@ async function checkGlobalUpdate() {
 更新命令： npm install -g ${npmName}`))
     }
 }
+
 function registerCommand() {
     program
-    .name(Object.keys(pkg.bin)[0])
-    .usage('<command> [options]')
-    .version(pkg.version)
-    .option('-d, --debug', '是否开启调试模式', false)
+        .name(Object.keys(pkg.bin)[0])
+        .usage('<command> [options]')
+        .version(pkg.version)
+        .option('-d, --debug', '是否开启调试模式', false)
+        .option('-tp, --targetPath <targetPath>', '是否指定本地调试文件路径', '')
 
     program
         .command('init [projectName]')
         .option('-f, --force', '是否强制初始化项目')
         .action(init)
 
+    // 监听debug命令
     program.on('option:debug', function() {
-        process.env.LOG_LEVEL = 'verbose'
-        log.level = process.env.LOG_LEVEL
-        log.verbose('环境变量', process.env.CLI_HOME_PATH)
+        process.env[constant.LOG_LEVEL] = 'verbose'
+        log.level = process.env[constant.LOG_LEVEL]
+        // log.verbose('环境变量', process.env[constant.CLI_HOME_PATH])
     })
+    
+    // 监听targetPath, 用于是否使用本地代码
+    program.on('option:targetPath', function() {
+        process.env[constant.CLI_TARGET_PATH] = program._optionValues.targetPath
+    })
+
+
     // 监听未注册的命令
     program.on('command:*', function (operands) {
         const availableCommands = program.commands.map(cmd => cmd.name());

@@ -1,8 +1,8 @@
 'use strict';
 
 
-function init(projectName, cmdObj)  {
-    console.log('init', projectName, cmdObj.force)
+function init(name, options, command)  {
+    console.log('init', name, options, process.env.CLI_TARGET_PATH)
 }
 
 
