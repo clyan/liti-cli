@@ -10,9 +10,10 @@ const colors = require('colors/safe')
 let userHome  = require('user-home')
 let pathExists  = require('path-exists').sync
 let commander  = require('commander')
-const log = require('@liti/log')
 const constant = require('./const')
 const pkg = require('../package.json')
+const init = require('@liti/init')
+const log = require('@liti/log')
 // 参数检查
 let args, config;
 
@@ -118,6 +119,12 @@ function registerCommand() {
     .usage('<command> [options]')
     .version(pkg.version)
     .option('-d, --debug', '是否开启调试模式', false)
+
+    program
+        .command('init [projectName]')
+        .option('-f, --force', '是否强制初始化项目')
+        .action(init)
+
     program.on('option:debug', function() {
         process.env.LOG_LEVEL = 'verbose'
         log.level = process.env.LOG_LEVEL
@@ -131,8 +138,6 @@ function registerCommand() {
         if(availableCommands.length > 0) {
             console.log(colors.red('可用命令：' + availableCommands.join(',')))
         }
-        // mySuggestBestMatch(operands[0], availableCommands);
-        // process.exitCode = 1;
     });
     
     program.parse(process.argv)
