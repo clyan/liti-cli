@@ -10,9 +10,9 @@ const colors = require('colors/safe')
 let userHome  = require('user-home')
 let pathExists  = require('path-exists').sync
 let commander  = require('commander')
-const constant = require('@liti/constants')
+const constants = require('@liti/constants')
 const pkg = require('../package.json')
-const init = require('@liti/init')
+const exec = require('@liti/exec')
 const log = require('@liti/log')
 
 const program = new commander.Command()
@@ -41,7 +41,7 @@ function checkVersion() {
  // 获取当前node版本号，比对最低版本号
 function checkNodeVersion() {
     let currentVersion = process.version;
-    let lowestVersion = constant.LOWEST_NODE_VERSION;
+    let lowestVersion = constants.LOWEST_NODE_VERSION;
     if(!semver.gte(currentVersion, lowestVersion)) {
         throw new Error(colors.red(`liti-cli需要安装v${lowestVersion}以上版本的Node.js`))
     }
@@ -79,12 +79,12 @@ function createDefaultConfig() {
     const cliConfig = {
         home: userHome
     }
-    if(process.env[constant.CLI_HOME]) {
-        cliConfig['cliHome'] = path.join(userHome, process.env[constant.CLI_HOME])
+    if(process.env[constants.CLI_HOME]) {
+        cliConfig['cliHome'] = path.join(userHome, process.env[constants.CLI_HOME])
     } else {
-        cliConfig['cliHome'] = path.join(userHome, constant.DEFAULT_CLI_HOME)
+        cliConfig['cliHome'] = path.join(userHome, constants.DEFAULT_CLI_HOME)
     }
-    process.env[constant.CLI_HOME_PATH] = cliConfig.cliHome;
+    process.env[constants.CLI_HOME_PATH] = cliConfig.cliHome;
 }
 async function checkGlobalUpdate() {
     // 1. 获取当前版本号和模块名
@@ -113,18 +113,18 @@ function registerCommand() {
     program
         .command('init [projectName]')
         .option('-f, --force', '是否强制初始化项目')
-        .action(init)
+        .action(exec)
 
     // 监听debug命令
     program.on('option:debug', function() {
-        process.env[constant.LOG_LEVEL] = 'verbose'
-        log.level = process.env[constant.LOG_LEVEL]
-        // log.verbose('环境变量', process.env[constant.CLI_HOME_PATH])
+        process.env[constants.LOG_LEVEL] = 'verbose'
+        log.level = process.env[constants.LOG_LEVEL]
+        // log.verbose('环境变量', process.env[constants.CLI_HOME_PATH])
     })
     
     // 监听targetPath, 用于是否使用本地代码
     program.on('option:targetPath', function() {
-        process.env[constant.CLI_TARGET_PATH] = program._optionValues.targetPath
+        process.env[constants.CLI_TARGET_PATH] = program._optionValues.targetPath
     })
 
 
