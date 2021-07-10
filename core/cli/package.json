@@ -17,6 +17,7 @@
     "lib"
   ],
   "dependencies": {
+    "@liti/constants": "file:../../utils/constants",
     "@liti/get-npm-info": "file:../../utils/get-npm-info",
     "@liti/init": "file:../../commands/init",
     "@liti/log": "file:../../utils/log",
