@@ -1,31 +1,36 @@
 'use strict';
 
 module.exports = core;
-const pkg = require('../package.json')
-const log = require('@liti/log')
+
+let path  = require('path')
+
 const semver = require('semver')
 const process = require('process')
 const colors = require('colors/safe')
 let userHome  = require('user-home')
-let path  = require('path')
 let pathExists  = require('path-exists').sync
+let commander  = require('commander')
+const log = require('@liti/log')
 const constant = require('./const')
+const pkg = require('../package.json')
 // 参数检查
 let args, config;
+
+const program = new commander.Command()
 async function core() {
     try {
         checkVersion()
         checkNodeVersion()
         checkRoot()
         checkUserHome()
-        checkInputArgs()
+        //checkInputArgs()
         checkEnv()
         checkGlobalUpdate()
+        registerCommand()
     } catch(e) {
         log.error(e.message)
     }
 }
-
 // 检查package.json中的版本号
 function checkVersion() {
     log.notice('liti', pkg.version)
@@ -105,5 +110,34 @@ async function checkGlobalUpdate() {
     if(lastVersion && semver.gt(lastVersion, currentVersion)) {
         log.warn('更新提示:',colors.yellow(`请手动更新${npmName}, 当前版本: ${currentVersion}, 最新版本: ${lastVersion}
 更新命令： npm install -g ${npmName}`))
+    }
+}
+function registerCommand() {
+    program
+    .name(Object.keys(pkg.bin)[0])
+    .usage('<command> [options]')
+    .version(pkg.version)
+    .option('-d, --debug', '是否开启调试模式', false)
+    program.on('option:debug', function() {
+        process.env.LOG_LEVEL = 'verbose'
+        log.level = process.env.LOG_LEVEL
+        log.verbose('环境变量', process.env.CLI_HOME_PATH)
+    })
+    // 监听未注册的命令
+    program.on('command:*', function (operands) {
+        const availableCommands = program.commands.map(cmd => cmd.name());
+        console.log(colors.red('未知的命令：' + operands[0]))
+        
+        if(availableCommands.length > 0) {
+            console.log(colors.red('可用命令：' + availableCommands.join(',')))
+        }
+        // mySuggestBestMatch(operands[0], availableCommands);
+        // process.exitCode = 1;
+    });
+    
+    program.parse(process.argv)
+    if(program.args && program.args.length < 1) {
+        program.outputHelp()
+        console.log()
     }
 }

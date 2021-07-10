@@ -17,9 +17,10 @@
     "lib"
   ],
   "dependencies": {
-    "@liti/log": "file:../../utils/log",
     "@liti/get-npm-info": "file:../../utils/get-npm-info",
+    "@liti/log": "file:../../utils/log",
     "colors": "^1.4.0",
+    "commander": "^8.0.0",
     "dotenv": "^10.0.0",
     "import-local": "^3.0.2",
     "minimist": "^1.2.5",
