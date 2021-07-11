@@ -5,7 +5,7 @@ const constants = require('@liti/constants');
 const log = require('@liti/log');
 class Command {
     constructor(argv) {
-        //console.log("Command constructor", argv)
+        //log.verbose("Command constructor", argv)
         if(!argv) {
             throw new Error(colors.red(`Command参数为空！`))
         }
