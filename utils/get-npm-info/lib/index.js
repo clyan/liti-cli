@@ -7,7 +7,7 @@ const log = require('@liti/log')
 const semverSort = require('semver-sort');
 
 // 给同一个包名获取版本做缓存
-let CacheVersion = {
+let CacheNpmInfo = {
 
 }
 
@@ -17,16 +17,16 @@ async function getNpmInfo(npmName, registry) {
     }
     const registryUrl = registry || getDefaultRegistry(false);
     const npmInfoUrl = urlJoin(registryUrl, npmName)
-    log.info('获取最新版本号中....')
+    log.info('获取@liti/cli最新版本号中....')
     // 给包的版本做缓存
-    if(CacheVersion[npmName]) {
-        return Promise.resolve(CacheVersion[npmName])
+    if(CacheNpmInfo[npmName]) {
+        return Promise.resolve(CacheNpmInfo[npmName])
     }
     return axios.get(npmInfoUrl).then(res => {
         if(res.status !== 200) {
             return null
         }
-        CacheVersion[npmName] = res.data
+        CacheNpmInfo[npmName] = res.data
         return res.data
     }).catch(err => {
         const { response } = err;
