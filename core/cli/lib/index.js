@@ -26,7 +26,6 @@ async function core() {
 }
 async function prepare() {
     checkVersion()
-    checkNodeVersion()
     checkRoot()
     checkUserHome()
     checkEnv()
@@ -36,15 +35,6 @@ async function prepare() {
 // 检查package.json中的版本号
 function checkVersion() {
     log.notice('liti', pkg.version)
-}
-
- // 获取当前node版本号，比对最低版本号
-function checkNodeVersion() {
-    let currentVersion = process.version;
-    let lowestVersion = constants.LOWEST_NODE_VERSION;
-    if(!semver.gte(currentVersion, lowestVersion)) {
-        throw new Error(colors.red(`liti-cli需要安装v${lowestVersion}以上版本的Node.js`))
-    }
 }
 
 function checkRoot() {

@@ -1,7 +1,7 @@
 {
-  "name": "@liti/init",
+  "name": "@liti/command",
   "version": "1.0.0",
-  "description": "liti-cli init 模块",
+  "description": "多进程模块",
   "author": "ywymoshi <2429335889@qq.com>",
   "homepage": "https://github.com/ywymoshi/liti-cli#readme",
   "license": "ISC",
@@ -27,7 +27,10 @@
     "url": "https://github.com/ywymoshi/liti-cli/issues"
   },
   "dependencies": {
-    "@liti/command": "file:../../models/command",
-    "@liti/log": "file:../../utils/log"
+    "@liti/constants": "file:../../utils/constants",
+    "@liti/log": "file:../../utils/log",
+    "@liti/utils": "file:../../utils/utils",
+    "colors": "^1.4.0",
+    "semver": "^7.3.5"
   }
 }

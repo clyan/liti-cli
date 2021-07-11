@@ -51,8 +51,13 @@ async function exec(...options) {
     log.verbose("rootFilePath", rootFilePath)
     if(rootFilePath) {
         // 执行init包
-        require(rootFilePath).apply(null, options)
-        log.verbose("rootFilePath",rootFilePath)
+        // log.verbose("options",options)
+        try {
+            require(rootFilePath).call(null, Array.from(options))
+            log.verbose("rootFilePath",rootFilePath)
+        } catch (error) {
+            log.error(error)
+        }
     }
 }
 module.exports = exec;
