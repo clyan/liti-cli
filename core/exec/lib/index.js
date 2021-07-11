@@ -1,9 +1,9 @@
 'use strict';
 const path = require("path")
+const path = require("path")
 const log = require("@liti/log")
 const constants = require("@liti/constants")
 const Package = require("@liti/package")
-const CACHE_DIR = 'dependencies/';
 const SETINGS = {
     init: '@liti/init'
 }
@@ -15,11 +15,11 @@ async function exec(...options) {
     const [ name, option, command ] = options;
     log.verbose('获取的是liti init test的init', command.parent.args[0])
     let packageName = SETINGS[command.parent.args[0]]
-    const packageVersion =  'latest'
+    const packageVersion =  constants.LATEST_VERSION
     let storeDir, pkg;
     if(!targetPath) {
         // 生成缓存路径
-        targetPath = path.resolve(homePath, CACHE_DIR) // 生成缓存路径
+        targetPath = path.resolve(homePath, constants.CACHE_DIR) // 生成缓存路径
         storeDir = path.resolve(targetPath, 'node_modules');
         log.verbose('targetPath', targetPath)
         log.verbose('storeDir', storeDir)

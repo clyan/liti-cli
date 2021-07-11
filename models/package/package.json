@@ -27,6 +27,7 @@
     "url": "https://github.com/ywymoshi/liti-cli/issues"
   },
   "dependencies": {
+    "@liti/constants": "file:../../utils/constants",
     "@liti/format-path": "file:../../utils/format-path",
     "@liti/get-npm-info": "file:../../utils/get-npm-info",
     "@liti/log": "file:../../utils/log",

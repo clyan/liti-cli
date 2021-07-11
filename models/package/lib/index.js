@@ -6,6 +6,7 @@ const npminstall = require("npminstall")
 const pathExists = require("path-exists")
 const formatPath = require("@liti/format-path")
 const getNpmInfo = require("@liti/get-npm-info")
+const constants = require("@liti/constants")
 const log = require("@liti/log")
 const fse = require('fs-extra')
 class Package {
@@ -31,7 +32,7 @@ class Package {
         if(this.storeDir && !pathExists(this.storeDir)) {
             fse.mkdirSync(this.storeDir)
         }
-        if(this.packageVersion === 'latest') {
+        if(this.packageVersion === constants.LATEST_VERSION) {
             this.packageVersion = await getNpmInfo.getNpmLatestVersioin(this.packageName, )
         }
         log.verbose(this.packageVersion)
