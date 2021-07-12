@@ -33,7 +33,7 @@ class Package {
             fse.mkdirSync(this.storeDir)
         }
         if(this.packageVersion === constants.LATEST_VERSION) {
-            this.packageVersion = await getNpmInfo.getNpmLatestVersioin(this.packageName, )
+            this.packageVersion = await getNpmInfo.getNpmLatestVersioin(this.packageName)
         }
         log.verbose(this.packageVersion)
     }

@@ -52,6 +52,7 @@ function getSemverVersion(baseVersion, versions) {
 // 获取最大的一个版本， 获取返回默认版本
 async function getNpmSemverVersion(baseVersion, npmName, registry) {
     const versions = await getNpmVersions(npmName, registry)
+    log.verbose(`${npmName}所有版本号：`, JSON.stringify(versions))
     const newVersions = getSemverVersion(baseVersion, versions)
     if(newVersions && newVersions.length > 0) {
         return newVersions[0]
