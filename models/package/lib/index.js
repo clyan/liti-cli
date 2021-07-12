@@ -56,7 +56,7 @@ class Package {
     // 安装package
     install() {
         return npminstall({
-            root: this.packageName,
+            root: this.targetPath,
             storeDir: this.storeDir,
             registry: getNpmInfo.getDefaultRegistry(),
             pkgs:[

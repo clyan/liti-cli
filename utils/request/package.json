@@ -1,7 +1,7 @@
 {
-  "name": "@liti/utils",
+  "name": "@liti/request",
   "version": "1.0.0",
-  "description": "公共方法包",
+  "description": "通用请求库",
   "author": "ywymoshi <2429335889@qq.com>",
   "homepage": "https://github.com/ywymoshi/liti-cli#readme",
   "license": "ISC",
@@ -27,6 +27,6 @@
     "url": "https://github.com/ywymoshi/liti-cli/issues"
   },
   "dependencies": {
-    "cli-spinner": "^0.2.10"
+    "axios": "^0.21.1"
   }
 }

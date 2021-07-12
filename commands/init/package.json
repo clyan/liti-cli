@@ -28,6 +28,14 @@
   },
   "dependencies": {
     "@liti/command": "file:../../models/command",
-    "@liti/log": "file:../../utils/log"
+    "@liti/constants": "file:../../utils/constants",
+    "@liti/log": "file:../../utils/log",
+    "@liti/package": "file:../../models/package",
+    "@liti/request": "file:../../utils/request",
+    "@liti/utils": "file:../../utils/utils",
+    "fs-extra": "^10.0.0",
+    "inquirer": "^8.1.1",
+    "semver": "^7.3.5",
+    "user-home": "^3.0.0"
   }
 }
