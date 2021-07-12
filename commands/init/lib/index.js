@@ -175,6 +175,10 @@ class InitCommand extends Command {
             };
         } else if (type === TYPE_COMPONENT) {
         }
+        if(projectInfo.projectName) {
+            projectInfo.projectName = require('kebab-case')(projectInfo.projectName).replace(/^-/, '')
+        }
+        log.verbose('projectInfo', projectInfo)
         return projectInfo;
     }
     createTemplateChoise() {
@@ -326,7 +330,7 @@ class InitCommand extends Command {
         log.info("项目启动中...")
         await this.execCommand(startCommand, '项目启动失败')
     }
-    installCustomTemplate() {
+    async installCustomTemplate() {
         console.log("安装自定义模板")
     }
     isDirEmpty(localPath) {
