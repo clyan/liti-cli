@@ -14,6 +14,7 @@ const TYPE_PROJECT = "project";
 const TYPE_COMPONENT = "component";
 const TEMPLATE_TYPE_NORMAL = "normal";
 const TEMPLATE_TYPE_CUSTOM = "custom";
+const WHILTE_COMMAND = ['npm', 'cnpm', 'yarn']
 const getProjectTemplate = require("./getProjectTemplate");
 class InitCommand extends Command {
     constructor(argv) {
@@ -261,6 +262,36 @@ class InitCommand extends Command {
             throw new Error('项目模板信息不存在')
         }
     }
+    checkCommand(cmd) {
+        if(WHILTE_COMMAND.includes(cmd)) {
+            return cmd;
+        }
+        return null;
+    }
+    async execCommand(command, errMsg) {
+        let ret;
+        try {
+            if(command && command.length > 0) {
+                const cmdArray = command.split(' ')
+                const cmd = this.checkCommand(cmdArray[0])
+                if(!cmd) {
+                    throw new Error(`命令不存在 command:${ command } `)
+                }
+                const args = cmdArray.slice(1)
+                ret = await execAsync(cmd, args, {
+                    stdio: 'inherit',
+                    cwd: process.cwd()
+                })
+            }
+            if(ret !== 0) {
+                throw new Error(errMsg)
+            }
+        } catch(e) {
+            log.error(e.message)
+            process.exit()
+        }
+        return ret;
+    }
     async installNormalTemplate() {
         log.verbose("templateInfo", this.templateInfo)
         let spinner = spinnerStart('正在安装模板');
@@ -287,35 +318,13 @@ class InitCommand extends Command {
             log.success("模板安装成功")
         }
         // 2.依赖安装
-        log.info("依赖安装中...")
         const { installCommand, startCommand } = this.templateInfo
-        let intalled;
-        if(installCommand && installCommand.length > 0) {
-            const intallCmd = installCommand.split(' ')
-            const cmd = intallCmd[0]
-            const args = intallCmd.slice(1)
-            intalled = await execAsync(cmd, args, {
-                stdio: 'inherit',
-                cwd: process.cwd()
-            })
-        }
-        if(intalled !== 0) {
-            throw new Error('依赖安装过程失败')
-        }
-        log.info("项目启动中...")
+        log.info("依赖安装中...")
+        log.verbose(`当前支持命令${WHILTE_COMMAND.join(', ')}`)
+        await this.execCommand(installCommand, '依赖安装过程失败')
         // 3. 启动命令执行
-        if(startCommand){
-            const startCmd = startCommand.split(' ')
-            const cmd = startCmd[0]
-            const args = startCmd.slice(1)
-            startCmd = await execAsync(cmd, args, {
-                stdio: 'inherit',
-                cwd: process.cwd()
-            })
-        }
-        if(startCmd !== 0) {
-            throw new Error('启动项目失败')
-        }
+        log.info("项目启动中...")
+        await this.execCommand(startCommand, '项目启动失败')
     }
     installCustomTemplate() {
         console.log("安装自定义模板")
