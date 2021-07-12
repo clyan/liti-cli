@@ -99,9 +99,10 @@ function registerCommand() {
         .version(pkg.version)
         .option('-d, --debug', '是否开启调试模式', false)
         .option('-tp, --targetPath <targetPath>', '是否指定本地调试文件路径', '')
-
+        
     program
         .command('init [projectName]')
+        //.option('-dc, --deleteCache', '清除模板缓存', false)
         .option('-f, --force', '是否强制初始化项目')
         .action(exec)
 

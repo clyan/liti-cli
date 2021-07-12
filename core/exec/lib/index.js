@@ -1,8 +1,8 @@
 'use strict';
-const cp = require("child_process")
 const path = require("path")
 const log = require("@liti/log")
 const constants = require("@liti/constants")
+const { exec:spawn } = require("@liti/utils")
 const Package = require("@liti/package")
 const SETINGS = {
     init: '@liti/init'
@@ -82,11 +82,5 @@ async function exec(...options) {
             log.error(error)
         }
     }
-}
-function spawn(command, args, options) {
-    const win32 = process.platform === 'win32';
-    const cmd = win32 ? 'cmd' : command;
-    const cmdArgs = win32  ? ['/c'].concat(command, args) : args
-    return cp.spawn(cmd, cmdArgs, options || {})
 }
 module.exports = exec;

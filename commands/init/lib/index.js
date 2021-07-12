@@ -2,7 +2,7 @@
 const Command = require("@liti/command");
 const log = require("@liti/log");
 const Package = require("@liti/package");
-const utils = require("@liti/utils");
+const { sleep, spinnerStart, execAsync } = require("@liti/utils");
 const constants = require("@liti/constants");
 const userHome = require('user-home');
 const path = require('path');
@@ -26,7 +26,6 @@ class InitCommand extends Command {
     }
     async exec() {
         try {
-            console.log("init的业务逻辑");
             //1. 准备阶段
             const projectInfo = await this.prepare();
             if (projectInfo) {
@@ -77,8 +76,11 @@ class InitCommand extends Command {
                     message: "是否确认清空当前目录下的文件？",
                 });
                 if (confirmDelete) {
+                    const spinner = spinnerStart('清空目录中....')
+                    await sleep(500)
                     // 清空当前目录, 并不会删除此目录
                     fse.emptyDirSync(localPath);
+                    spinner.stop(true)
                 }
             }
         }
@@ -209,8 +211,8 @@ class InitCommand extends Command {
             packageVersion: version,
         })
         if(!await templateNpm.exists()) {
-            const spinner = utils.spinnerStart('正在下载模板...');
-            await utils.sleep()
+            const spinner = spinnerStart('正在下载模板...');
+            await sleep()
             try {
                 await templateNpm.install()
             } catch(err) {
@@ -222,8 +224,8 @@ class InitCommand extends Command {
                 }
             }
         } else {
-            const spinner = utils.spinnerStart('正在更新模板...');
-            await utils.sleep()
+            const spinner = spinnerStart('正在更新模板...');
+            await sleep()
             try {
                 await templateNpm.update()
             } catch(err) {
@@ -260,8 +262,9 @@ class InitCommand extends Command {
         }
     }
     async installNormalTemplate() {
-        let spinner = utils.spinnerStart('正在安装模板');
-        await utils.sleep();
+        log.verbose("templateInfo", this.templateInfo)
+        let spinner = spinnerStart('正在安装模板');
+        await sleep();
         try {
             // 1. 拷贝模板代码 ,将缓存目录下的内容，拷贝到用户执行当前目录中
             // 获取缓存目录
@@ -271,7 +274,7 @@ class InitCommand extends Command {
             
             log.verbose("模板目录", templatePath)
             log.verbose("当前目录", targetPath)
-            
+
             // 确保目录存在，没有则会创建
             fse.ensureDirSync(templatePath)
             fse.ensureDirSync(targetPath)
@@ -283,7 +286,36 @@ class InitCommand extends Command {
             spinner.stop(true);
             log.success("模板安装成功")
         }
-        // 2.
+        // 2.依赖安装
+        log.info("依赖安装中...")
+        const { installCommand, startCommand } = this.templateInfo
+        let intalled;
+        if(installCommand && installCommand.length > 0) {
+            const intallCmd = installCommand.split(' ')
+            const cmd = intallCmd[0]
+            const args = intallCmd.slice(1)
+            intalled = await execAsync(cmd, args, {
+                stdio: 'inherit',
+                cwd: process.cwd()
+            })
+        }
+        if(intalled !== 0) {
+            throw new Error('依赖安装过程失败')
+        }
+        log.info("项目启动中...")
+        // 3. 启动命令执行
+        if(startCommand){
+            const startCmd = startCommand.split(' ')
+            const cmd = startCmd[0]
+            const args = startCmd.slice(1)
+            startCmd = await execAsync(cmd, args, {
+                stdio: 'inherit',
+                cwd: process.cwd()
+            })
+        }
+        if(startCmd !== 0) {
+            throw new Error('启动项目失败')
+        }
     }
     installCustomTemplate() {
         console.log("安装自定义模板")
