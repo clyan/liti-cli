@@ -12,6 +12,8 @@ const fse = require("fs-extra");
 const semver = require("semver");
 const TYPE_PROJECT = "project";
 const TYPE_COMPONENT = "component";
+const TEMPLATE_TYPE_NORMAL = "normal";
+const TEMPLATE_TYPE_CUSTOM = "custom";
 const getProjectTemplate = require("./getProjectTemplate");
 class InitCommand extends Command {
     constructor(argv) {
@@ -33,7 +35,7 @@ class InitCommand extends Command {
                 this.projectInfo = projectInfo;
                 await this.downloadTemplate();
                 //3. 安装模板
-
+                await this.installTemplate();
             }
         } catch (e) {
             log.error(e.message);
@@ -199,6 +201,7 @@ class InitCommand extends Command {
             constants.NODE_MODULES
             )
         const {  npmName, version } = templateInfo;
+        this.templateInfo = templateInfo;
         const templateNpm = new Package({
             targetPath,
             storeDir,
@@ -210,25 +213,80 @@ class InitCommand extends Command {
             await utils.sleep()
             try {
                 await templateNpm.install()
-                log.success("模板下载成功")
             } catch(err) {
                 throw err
             } finally {
                 spinner.stop(true)
+                if(templateNpm.exists()) {
+                    log.success("模板下载成功")
+                }
             }
         } else {
             const spinner = utils.spinnerStart('正在更新模板...');
             await utils.sleep()
             try {
                 await templateNpm.update()
-                log.success("模板更新成功")
             } catch(err) {
                 throw err
             } finally {
                 spinner.stop(true)
+                if(templateNpm.exists()) {
+                    log.success("模板更新成功")
+                }
             }
         }
-        console.log(targetPath, storeDir)
+        // 赋值到原型上供模板安装时使用
+        this.templateNpm = templateNpm
+        log.verbose("模板目录", targetPath)
+        log.verbose("模板缓存目录", storeDir)
+    }
+    async installTemplate() {
+        // console.log("templateInfo", this.templateInfo)
+        if(this.templateInfo) {
+            if(!this.templateInfo.type) {
+                this.templateInfo.type = TEMPLATE_TYPE_NORMAL
+            }
+            if(this.templateInfo.type === TEMPLATE_TYPE_NORMAL) {
+                // 标准安装
+                this.installNormalTemplate()
+            } else if(this.templateInfo.type === TEMPLATE_TYPE_CUSTOM){
+                // 自定义安装
+                this.installCustomTemplate()
+            } else {
+                throw new Error('无法识别项目模板类型')
+            }
+        } else {
+            throw new Error('项目模板信息不存在')
+        }
+    }
+    async installNormalTemplate() {
+        let spinner = utils.spinnerStart('正在安装模板');
+        await utils.sleep();
+        try {
+            // 1. 拷贝模板代码 ,将缓存目录下的内容，拷贝到用户执行当前目录中
+            // 获取缓存目录
+            const templatePath = path.resolve(this.templateNpm.cacheFilePath + '/template')
+            // 获取当前目录
+            const targetPath = process.cwd()
+            
+            log.verbose("模板目录", templatePath)
+            log.verbose("当前目录", targetPath)
+            
+            // 确保目录存在，没有则会创建
+            fse.ensureDirSync(templatePath)
+            fse.ensureDirSync(targetPath)
+            // 拷贝
+            fse.copySync(templatePath, targetPath)
+        } catch (error) {
+            throw error
+        } finally {
+            spinner.stop(true);
+            log.success("模板安装成功")
+        }
+        // 2.
+    }
+    installCustomTemplate() {
+        console.log("安装自定义模板")
     }
     isDirEmpty(localPath) {
         let fileList = fs.readdirSync(localPath);
